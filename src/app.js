@@ -1,6 +1,10 @@
 const express = require('express');
 const cors = require('cors');
+const httpStatus = require('http-status');
 const fileUpload = require('express-fileupload');
+const routes = require('./route');
+const { errorConverter, errorHandler } = require('./middlewares/error');
+const ApiError = require('./helper/ApiError');
 // eslint-disable-next-line import/order
 const passport = require('passport');
 
@@ -25,7 +29,23 @@ app.use('/public', express.static('public'));
 app.get('/', async (req, res) => {
     res.status(200).send('Congratulations! API is working!');
 });
+app.use('/api', routes);
 
 // jwt authentication
 app.use(passport.initialize());
+
+// send back a 404 error for any unknown api request
+app.use((req, res, next) => {
+    next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
+});
+
+// convert error to ApiError, if needed
+app.use(errorConverter);
+
+// handle error
+app.use(errorHandler);
+// require('pg').defaults.parseInt8 = true;
+const db = require('./models');
+
+db.sequelize.sync();
 module.exports = app;
