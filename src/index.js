@@ -7,5 +7,4 @@ const http = require('http');
 const server = http.createServer(app);
 // eslint-disable-next-line import/order
 
-
 server.listen(config.port, () => {});
